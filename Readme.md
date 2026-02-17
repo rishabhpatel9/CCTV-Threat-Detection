@@ -95,6 +95,9 @@ Why separate? Object detection is spatial (bounding boxes), while behavior recog
 
 ## Features to be added
 
+- Violence/Fighting Detection Model - Use YOLOv8 as a preprocessing step to detect and crop people from frames before feeding them into an action recognition model. This can improve accuracy by focusing on human regions instead of background noise.
+- Anomaly/Loitering Detection Model - YOLOv8 can again be used as a supporting module to detect people and track them with DeepSORT.Feed tracked trajectories into anomaly detection (e.g., loitering = person stays in same region too long). This helps with object/person localization.
+- Vehicle Detection: use COCO/Open Images for “car,” “truck,” “bus” classes.
 - Smoke/Fire Detection (Environmental Safety): Could use datasets like FireNet or Smoke Detection Dataset (Kaggle).
 - Abandoned Object Detection: use COCO/Open Images for “bag/backpack” detection and then apply anomaly logic (bag present without person).
 - Restricted Zones / Tripwires: This is a post-processing feature to be added later by defining geofences in Streamlit/FastAPI pipeline.
