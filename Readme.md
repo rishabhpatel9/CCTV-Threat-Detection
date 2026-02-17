@@ -1,26 +1,26 @@
 ## Planned Architecture
 
 ### 1. Object Detection & Tracking (YOLOv8 + DeepSORT)
-**Purpose:** Detect and track people, vehicles, and weapons.
-**Model:** YOLOv8 fine-tuned on [CCTV Weapon Dataset](https://huggingface.co/datasets/Simuletic/cctv-weapon-dataset)
+**Purpose:** Detect and track people, vehicles, and weapons.\
+**Model:** YOLOv8 fine-tuned on [CCTV Weapon Dataset](https://huggingface.co/datasets/Simuletic/cctv-weapon-dataset)\
 **Output:** Bounding boxes + IDs for individuals and objects.
 
 Why separate? Object detection is spatial (bounding boxes), while behavior recognition is temporal (motion patterns).
 
 ### 2. Action Recognition (Violence, Fighting, Running, Loitering)
-**Purpose:** Classify suspicious behaviors.
-**Model:** Action recognition networks (like SlowFast, I3D, ConvLSTM). (yet to be finalized)
-**Datasets:** Violence detection dataset (e.g., [UCF Crime Dataset](https://www.kaggle.com/datasets/odins0n/ucf-crime-dataset), [Smart-City CCTV Violence Detection Dataset (SCVD)](https://www.kaggle.com/datasets/toluwaniaremu/smartcity-cctv-violence-detection-dataset-scvd)).
+**Purpose:** Classify suspicious behaviors.\
+**Model:** Action recognition networks (like SlowFast, I3D, ConvLSTM). (yet to be finalized)\
+**Datasets:** Violence detection dataset (e.g., [UCF Crime Dataset](https://www.kaggle.com/datasets/odins0n/ucf-crime-dataset), [Smart-City CCTV Violence Detection Dataset (SCVD)](https://www.kaggle.com/datasets/toluwaniaremu/smartcity-cctv-violence-detection-dataset-scvd)).\
 **Output:** Labels like “fighting,” “running,” “loitering.”
 
 ### 3. Anomaly Detection (Abandoned Objects, Unusual Motion)
-**Purpose:** Detect anomalies not explicitly labeled.
-**Model:** Autoencoders or one-class SVMs trained on “normal” CCTV footage.
+**Purpose:** Detect anomalies not explicitly labeled.\
+**Model:** Autoencoders or one-class SVMs trained on “normal” CCTV footage.\
 **Output:** Flags unusual activity (e.g., bag left behind, erratic movement).
 
 ### 4. Fusion Layer (Threat Scoring)
-**Purpose:** Combine outputs from all modules.
-**Implementation:** Lightweight rule-based system or ensemble classifier.
+**Purpose:** Combine outputs from all modules.\
+**Implementation:** Lightweight rule-based system or ensemble classifier.\
 **Logic Example:**
 - Person + weapon → High threat.
 - Group + aggressive gestures → Violence alert.
