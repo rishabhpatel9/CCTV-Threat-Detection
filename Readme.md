@@ -93,8 +93,9 @@ Why separate? Object detection is spatial (bounding boxes), while behavior recog
 - Loitering/anomaly detection → UCF-Crime (loitering, abnormal events).
 - General suspicious behavior → UCF-Crime (multiple anomaly categories).
 
-## Features to be added
+## Future Work
 
+- Improve violence-detection-slowfast model by training on SCVD + UCF-Crime datasets.
 - Violence/Fighting Detection Model - Use YOLOv8 as a preprocessing step to detect and crop people from frames before feeding them into an action recognition model. This can improve accuracy by focusing on human regions instead of background noise.
 - Anomaly/Loitering Detection Model - YOLOv8 can again be used as a supporting module to detect people and track them with DeepSORT.Feed tracked trajectories into anomaly detection (e.g., loitering = person stays in same region too long). This helps with object/person localization.
 - Vehicle Detection: use COCO/Open Images for “car,” “truck,” “bus” classes.
