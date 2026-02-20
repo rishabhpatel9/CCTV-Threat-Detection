@@ -60,16 +60,19 @@ class FusionResponse(BaseModel):
 
 @app.post("/predict", response_model=FusionResponse)
 async def predict(file: UploadFile):
-    # TO DO: preprocess frames/video
-    # Dummy values for now
-    weapon_conf = 0.72
-    violence_conf = 0.35
-    anomaly_score = 0.61
+    try:
+        # TODO: preprocess frames/video and run models
+        # For now, return dummy values to avoid JSONDecodeError
+        weapon_conf = 0.0
+        violence_conf = 0.0
+        anomaly_score = 0.0
+        decision = fusion_rule(weapon_conf, violence_conf, anomaly_score)
 
-    decision = fusion_rule(weapon_conf, violence_conf, anomaly_score)
-    return FusionResponse(
-        weapon_conf=weapon_conf,
-        violence_conf=violence_conf,
-        anomaly_score=anomaly_score,
-        fusion_decision=decision
-    )
+        return FusionResponse(
+            weapon_conf=weapon_conf,
+            violence_conf=violence_conf,
+            anomaly_score=anomaly_score,
+            fusion_decision=decision
+        )
+    except Exception as e:
+        return {"error": str(e)}
