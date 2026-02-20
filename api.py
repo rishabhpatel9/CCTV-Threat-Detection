@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile
 from pydantic import BaseModel
 import torch
+import torch.nn as nn
 from ultralytics import YOLO
 
 app = FastAPI()
@@ -9,24 +10,27 @@ app = FastAPI()
 weapon_model = YOLO("Notebooks/yolov8n.pt")
 
 # Load Violence detection model (SlowFast)
-violence_model = torch.load("Notebooks/violence-detection-slowfast-model.pth")
+violence_model = torch.hub.load('facebookresearch/pytorchvideo', 'slowfast_r50', pretrained=False)
+violence_model.blocks[-1].proj = nn.Linear(violence_model.blocks[-1].proj.in_features, 3)
+violence_model.load_state_dict(torch.load(r"Notebooks/violence-detection-slowfast-model.pth"))
 violence_model.eval()
 
 # Define Autoencoder for Anomaly detection
-class Autoencoder(torch.nn.Module):
+class Autoencoder(nn.Module):
     def __init__(self, input_dim=2048, hidden_dim=512):
-        super().__init__()
-        self.encoder = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, hidden_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_dim, hidden_dim//2),
-            torch.nn.ReLU()
+        super(Autoencoder, self).__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim//2),
+            nn.ReLU()
         )
-        self.decoder = torch.nn.Sequential(
-            torch.nn.Linear(hidden_dim//2, hidden_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_dim, input_dim)
+        self.decoder = nn.Sequential(
+            nn.Linear(hidden_dim//2, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, input_dim)
         )
+
     def forward(self, x):
         z = self.encoder(x)
         return self.decoder(z)

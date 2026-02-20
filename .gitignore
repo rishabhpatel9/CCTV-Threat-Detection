@@ -1,3 +1,6 @@
 /Data/
 /Notebooks/violence-detection-slowfast-model.pth
 /Notebooks/violence-detection-i3d-model.pth
+
+# Python
+/__pycache__/
