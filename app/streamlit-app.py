@@ -16,7 +16,12 @@ if uploaded_file:
     if st.button("Run Detection"):
         files = {"file": uploaded_file.getbuffer()}
         response = requests.post("http://localhost:8000/predict", files=files)
-        result = response.json()
+
+        try:
+            result = response.json()
+        except Exception:
+            st.error("API did not return valid JSON. Check FastAPI logs for details.")
+            st.stop()
 
         decision = result["fusion_decision"]
 
@@ -33,4 +38,3 @@ if uploaded_file:
             st.success(f"Fusion Decision: {decision}")
         else:
             st.error(f"Fusion Decision: {decision}")
-
