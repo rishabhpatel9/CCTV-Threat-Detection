@@ -12,7 +12,7 @@ app = FastAPI()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load Weapons detection model (YOLOv8)
-weapon_model = YOLO("Notebooks/cctv-weapon-model-mark2.pt")
+weapon_model = YOLO("Notebooks/weapon-detection-model-mark2.pt")
 
 # Load Violence detection model (SlowFast)
 violence_model = torch.hub.load('facebookresearch/pytorchvideo', 'slowfast_r50', pretrained=False)
@@ -48,7 +48,7 @@ class Autoencoder(nn.Module):
 
 # Load Anomaly detection model (Autoencoder)
 anomaly_model = Autoencoder().to(device)
-anomaly_model.load_state_dict(torch.load("Notebooks/autoencoder_ucfcrime_epoch10.pth", map_location=device))
+anomaly_model.load_state_dict(torch.load("Notebooks/anamoly-detection-model-epoch10.pth", map_location=device))
 anomaly_model.eval()
 
 # Preprocessing
