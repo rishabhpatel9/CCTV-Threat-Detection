@@ -1,4 +1,5 @@
 /Data/
 Release-notes.md
-# Python
+/Notebooks/yolov8n.pt
+/Notebooks/yolo26n.pt
 /__pycache__/
