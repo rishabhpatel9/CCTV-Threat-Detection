@@ -64,15 +64,18 @@ while run:
     # Convert color space from BGR (OpenCV default) to RGB (Streamlit/Image default)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     
-    # Draw latest known bounding boxes
     for box in latest_boxes:
         x1, y1, x2, y2 = box['x1'], box['y1'], box['x2'], box['y2']
         conf = box['conf']
-        # Draw red rectangle
-        cv2.rectangle(frame_rgb, (x1, y1), (x2, y2), (255, 0, 0), 2)
+        class_name = box.get('class_name', 'Weapon').capitalize()
+        
+        # Draw red rectangle for weapon, green for person
+        color = (0, 255, 0) if class_name.lower() == 'person' else (255, 0, 0)
+        
+        cv2.rectangle(frame_rgb, (x1, y1), (x2, y2), color, 2)
         # Add confidence label
-        cv2.putText(frame_rgb, f"Weapon: {conf:.2f}", (x1, y1 - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+        cv2.putText(frame_rgb, f"{class_name}: {conf:.2f}", (x1, y1 - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
     # Update image placeholder with the current frame
     frame_window.image(frame_rgb)

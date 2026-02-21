@@ -109,23 +109,37 @@ def run_weapon_model(file_bytes):
     results = weapon_model(image, device="cpu")
     
     boxes_data = []
-    confs = []
+    weapon_confs = []
     for box in results[0].boxes:
         conf = box.conf.item()
-        confs.append(conf)
-        x1, y1, x2, y2 = box.xyxy[0].tolist()
-        boxes_data.append({"x1": int(x1), "y1": int(y1), "x2": int(x2), "y2": int(y2), "conf": conf})
+        cls_id = int(box.cls.item())
+        class_name = weapon_model.names.get(cls_id, "unknown")
         
-    return (max(confs) if confs else 0.0, boxes_data)
+        x1, y1, x2, y2 = box.xyxy[0].tolist()
+        boxes_data.append({
+            "x1": int(x1), "y1": int(y1), "x2": int(x2), "y2": int(y2), 
+            "conf": conf,
+            "class_name": class_name
+        })
+        
+        # Only aggregate confidence if it's not a person
+        if class_name != "person":
+            weapon_confs.append(conf)
+            
+    return (max(weapon_confs) if weapon_confs else 0.0, boxes_data)
 
 def run_weapon_model_video(video_bytes, ext="mp4", num_frames=8):
     frames = extract_frames(video_bytes, ext, num_frames=num_frames)
-    confs = []
+    weapon_confs = []
     for frame in frames:  # each frame is (C,H,W)
         img = transforms.ToPILImage()(frame)
         results = weapon_model(img, device="cpu")
-        confs.extend([box.conf.item() for box in results[0].boxes])
-    return max(confs) if confs else 0.0
+        for box in results[0].boxes:
+            cls_id = int(box.cls.item())
+            class_name = weapon_model.names.get(cls_id, "unknown")
+            if class_name != "person":
+                weapon_confs.append(box.conf.item())
+    return max(weapon_confs) if weapon_confs else 0.0
 
 def run_violence_model_video(video_bytes, ext="mp4"):
     frames = extract_frames(video_bytes, ext=ext, num_frames=32)
