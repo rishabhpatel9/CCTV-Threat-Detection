@@ -11,7 +11,12 @@ from ultralytics import YOLO
 app = FastAPI()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Load Weapons detection model (YOLOv8)
+# Load Weapons detection model (YOLOv8 trained on weapon detection cctv v3 dataset.v1-weapon_detection_in_cctv.yolov8 from roboflow)
+weapon_model = YOLO("Notebooks/weapon-detection-model-mark2.pt")
+
+# OR
+
+# Load Weapons detection model (YOLOv8 trained on weapon detection cctv v3 dataset.v1-weapon_detection_in_cctv.yolov8 from roboflow)
 weapon_model = YOLO("Notebooks/weapon-detection-model-mark2.pt")
 
 # Load Violence detection model (SlowFast)
