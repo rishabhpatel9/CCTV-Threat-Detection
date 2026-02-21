@@ -12,7 +12,7 @@ app = FastAPI()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load Weapons detection model (YOLOv8)
-weapon_model = YOLO("Notebooks/yolov8n.pt")
+weapon_model = YOLO("Notebooks/cctv-weapon-model-mark2.pt")
 
 # Load Violence detection model (SlowFast)
 violence_model = torch.hub.load('facebookresearch/pytorchvideo', 'slowfast_r50', pretrained=False)
