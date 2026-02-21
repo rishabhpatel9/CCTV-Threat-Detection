@@ -107,8 +107,16 @@ def create_slowfast_inputs(frames, alpha=4):
 def run_weapon_model(file_bytes):
     image = Image.open(io.BytesIO(file_bytes)).convert("RGB")
     results = weapon_model(image, device="cpu")
-    confs = [box.conf.item() for box in results[0].boxes]
-    return max(confs) if confs else 0.0
+    
+    boxes_data = []
+    confs = []
+    for box in results[0].boxes:
+        conf = box.conf.item()
+        confs.append(conf)
+        x1, y1, x2, y2 = box.xyxy[0].tolist()
+        boxes_data.append({"x1": int(x1), "y1": int(y1), "x2": int(x2), "y2": int(y2), "conf": conf})
+        
+    return (max(confs) if confs else 0.0, boxes_data)
 
 def run_weapon_model_video(video_bytes, ext="mp4", num_frames=8):
     frames = extract_frames(video_bytes, ext, num_frames=num_frames)
@@ -170,6 +178,7 @@ class FusionResponse(BaseModel):
     violence_conf: float
     anomaly_score: float
     fusion_decision: str
+    weapon_boxes: list = []
 
 # API Endpoint
 @app.post("/predict", response_model=FusionResponse)
@@ -182,11 +191,12 @@ async def predict(file: UploadFile):
 
         if filename.endswith((".mp4", ".avi", ".mov")):
             weapon_conf = run_weapon_model_video(contents, ext)
+            weapon_boxes = [] # Currently video returns a single max conf over frames
             violence_conf = run_violence_model_video(contents, ext)
             anomaly_score = run_anomaly_model_video(contents, ext)
         else:
             tensor = preprocess_image(contents)
-            weapon_conf = run_weapon_model(contents)
+            weapon_conf, weapon_boxes = run_weapon_model(contents)
             violence_conf = 0.0
             anomaly_score = run_anomaly_model(tensor)
 
@@ -197,12 +207,14 @@ async def predict(file: UploadFile):
             weapon_conf=weapon_conf,
             violence_conf=violence_conf,
             anomaly_score=anomaly_score,
-            fusion_decision=decision
+            fusion_decision=decision,
+            weapon_boxes=weapon_boxes
         )
     except Exception as e:
         return FusionResponse(
             weapon_conf=0.0,
             violence_conf=0.0,
             anomaly_score=0.0,
-            fusion_decision=f"Error: {str(e)}"
+            fusion_decision=f"Error: {str(e)}",
+            weapon_boxes=[]
         )
