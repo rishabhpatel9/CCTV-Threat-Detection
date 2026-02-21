@@ -35,6 +35,8 @@ if uploaded_file:
 
         # Color-coded badge
         if "Safe" in decision:
-            st.success(f"Fusion Decision: {decision}")
+            st.success(f"{decision}")
+        elif "Warning" in decision:
+            st.warning(f"{decision}")
         else:
-            st.error(f"Fusion Decision: {decision}")
+            st.error(f"{decision}")

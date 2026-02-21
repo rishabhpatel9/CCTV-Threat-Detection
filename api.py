@@ -5,6 +5,7 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from PIL import Image
 import io
+import cv2
 from ultralytics import YOLO
 
 app = FastAPI()
@@ -57,19 +58,50 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.45,0.45,0.45], std=[0.225,0.225,0.225])
 ])
 
-# def preprocess_image(contents):
-#     image = Image.open(io.BytesIO(contents)).convert("RGB")
-#     return transform(image).unsqueeze(0).to(device)  # (1, C, H, W)
-
-# for testing images - to remove
+# For images: fake temporal dimension
 def preprocess_image(contents, num_frames=8):
     image = Image.open(io.BytesIO(contents)).convert("RGB")
-    frame = transform(image)  # shape (3, H, W)
-
-    # Repeat the frame along the temporal dimension
+    frame = transform(image)  # (3, H, W)
     clip = frame.unsqueeze(1).repeat(1, num_frames, 1, 1)  # (3, T, H, W)
-
     return clip.unsqueeze(0).to(device)  # (1, 3, T, H, W)
+
+# For videos: extract frames
+def extract_frames(video_bytes, ext="mp4", num_frames=32):
+    tmp_path = f"__pycache__/temp_video.{ext}"
+    with open(tmp_path, "wb") as f:
+        f.write(video_bytes)
+
+    cap = cv2.VideoCapture(tmp_path)
+    if not cap.isOpened():
+        raise ValueError(f"Video file {tmp_path} could not be opened. Check codec/extension.")
+
+    frames = []
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    step = max(total_frames // num_frames, 1)
+
+    for i in range(0, total_frames, step):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        pil_img = Image.fromarray(frame)
+        frames.append(transform(pil_img))
+        if len(frames) >= num_frames:
+            break
+    cap.release()
+
+    if not frames:
+        raise ValueError("No frames extracted from video")
+
+    return torch.stack(frames)  # (T, C, H, W)
+
+def create_slowfast_inputs(frames, alpha=4):
+    # frames: (T, C, H, W)
+    fast_pathway = frames.permute(1,0,2,3)  # (C, T, H, W)
+    slow_pathway = torch.index_select(frames, 0, torch.arange(0, frames.shape[0], alpha))
+    slow_pathway = slow_pathway.permute(1,0,2,3)  # (C, T/alpha, H, W)
+    return [slow_pathway.unsqueeze(0).to(device), fast_pathway.unsqueeze(0).to(device)]
 
 # Inference Functions
 def run_weapon_model(file_bytes):
@@ -78,42 +110,49 @@ def run_weapon_model(file_bytes):
     confs = [box.conf.item() for box in results[0].boxes]
     return max(confs) if confs else 0.0
 
-def run_violence_model(tensor):
-    # with torch.no_grad():
-    #     # SlowFast expects [slow_pathway, fast_pathway]
-    #     inputs = [tensor, tensor]  
-    #     logits = violence_model(inputs)  # shape (1,3)
-    #     probs = torch.softmax(logits, dim=1)
-    # return probs[0,1].item()  # violence probability    
-    return 0.0
+def run_weapon_model_video(video_bytes, ext="mp4", num_frames=8):
+    frames = extract_frames(video_bytes, ext, num_frames=num_frames)
+    confs = []
+    for frame in frames:  # each frame is (C,H,W)
+        img = transforms.ToPILImage()(frame)
+        results = weapon_model(img, device="cpu")
+        confs.extend([box.conf.item() for box in results[0].boxes])
+    return max(confs) if confs else 0.0
 
-# def run_anomaly_model(tensor):
-#     with torch.no_grad():
-#         # Extract I3D features
-#         features = i3d(tensor)              # shape (1, 2048)
-#         features = features.view(features.size(0), -1)
+def run_violence_model_video(video_bytes):
+    frames = extract_frames(video_bytes, num_frames=32)
+    inputs = create_slowfast_inputs(frames)
+    with torch.no_grad():
+        logits = violence_model(inputs)
+        probs = torch.softmax(logits, dim=1)
+    return probs[0,1].item()
 
-#         # Autoencoder reconstruction
-#         outputs = anomaly_model(features)
-#         loss = torch.mean((outputs - features)**2, dim=1)
-
-#     return loss.item()
-
-# for testing images - to remove
 def run_anomaly_model(tensor):
     with torch.no_grad():
-        features = i3d(tensor)              # shape (1, 2048)
+        features = i3d(tensor)              # (1, 2048)
         features = features.view(features.size(0), -1)
         outputs = anomaly_model(features)
         loss = torch.mean((outputs - features)**2, dim=1)
     return loss.item()
 
+def run_anomaly_model_video(video_bytes):
+    frames = extract_frames(video_bytes, num_frames=32)
+    clip = frames.permute(1,0,2,3).unsqueeze(0).to(device)  # (1, C, T, H, W)
+    with torch.no_grad():
+        features = i3d(clip)
+        features = features.view(features.size(0), -1)
+        outputs = anomaly_model(features)
+        loss = torch.mean((outputs - features)**2, dim=1)
+    return loss.item()
 
 # Rule-based fusion
 def fusion_rule(weapon_conf, violence_conf, anomaly_score,
-                weapon_thresh=0.5, violence_thresh=0.5, anomaly_thresh=0.5):
+                weapon_thresh=0.5, weapon_warning_low=0.2,
+                violence_thresh=0.5, anomaly_thresh=0.5):
     if weapon_conf >= weapon_thresh:
         return "Threat detected! : Weapon"
+    elif weapon_conf >= weapon_warning_low:
+        return "Warning: Possible Weapon"
     elif violence_conf >= violence_thresh:
         return "Threat detected! : Violence"
     elif anomaly_score >= anomaly_thresh:
@@ -133,18 +172,20 @@ async def predict(file: UploadFile):
     try:
         contents = await file.read()
 
-        # Preprocess
-        tensor = preprocess_image(contents)
+        filename = file.filename.lower() if file.filename else "temp.mp4"
+        ext = filename.split(".")[-1]
 
-        # Run models
-        weapon_conf = run_weapon_model(contents)
+        if filename.endswith((".mp4", ".avi", ".mov")):
+            weapon_conf = run_weapon_model_video(contents, ext)
+            violence_conf = run_violence_model_video(contents, ext)
+            anomaly_score = run_anomaly_model_video(contents, ext)
+        else:
+            tensor = preprocess_image(contents)
+            weapon_conf = run_weapon_model(contents)
+            violence_conf = 0.0
+            anomaly_score = run_anomaly_model(tensor)
 
-        # SlowFast expects a list of tensors (slow + fast pathways)
-        violence_conf = run_violence_model([tensor, tensor])
 
-        anomaly_score = run_anomaly_model(tensor)
-
-        # Fusion
         decision = fusion_rule(weapon_conf, violence_conf, anomaly_score)
 
         return FusionResponse(
@@ -154,7 +195,6 @@ async def predict(file: UploadFile):
             fusion_decision=decision
         )
     except Exception as e:
-        # Always return a valid FusionResponse, even on error
         return FusionResponse(
             weapon_conf=0.0,
             violence_conf=0.0,
