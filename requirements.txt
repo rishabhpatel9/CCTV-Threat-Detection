@@ -1,12 +1,21 @@
-#comment out datasets if you're not training the model
-datasets
-ultralytics
+#uncomment datasets if you're training the model without downloading the dataset manually
+#datasets
 
+#Threat Detection Models & Utils
+ultralytics
 torch
 torchvision
-torchaudio
 opencv-python
 numpy
 matplotlib
 seaborn
 scikit-learn
+pillow
+
+#API & Web App
+fastapi
+pydantic
+python-multipart
+uvicorn
+streamlit
+requests
