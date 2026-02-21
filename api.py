@@ -16,8 +16,8 @@ weapon_model = YOLO("Notebooks/weapon-detection-model-mark2.pt")
 
 # OR
 
-# Load Weapons detection model (YOLOv8 trained on weapon detection cctv v3 dataset.v1-weapon_detection_in_cctv.yolov8 from roboflow)
-weapon_model = YOLO("Notebooks/weapon-detection-model-mark2.pt")
+# Load Weapons detection model (YOLOv8 trained on simuletic weapon detection dataset)
+#weapon_model = YOLO("Notebooks/weapon-detection-model-simuletic.pt")
 
 # Load Violence detection model (SlowFast)
 violence_model = torch.hub.load('facebookresearch/pytorchvideo', 'slowfast_r50', pretrained=False)
@@ -71,7 +71,7 @@ def preprocess_image(contents, num_frames=8):
     return clip.unsqueeze(0).to(device)  # (1, 3, T, H, W)
 
 # For videos: extract frames
-def extract_frames(video_bytes, ext="mp4", num_frames=32):
+def extract_frames(video_bytes, ext="mp4", num_frames=32, apply_transform=True):
     tmp_path = f"__pycache__/temp_video.{ext}"
     with open(tmp_path, "wb") as f:
         f.write(video_bytes)
@@ -91,7 +91,12 @@ def extract_frames(video_bytes, ext="mp4", num_frames=32):
             break
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(frame)
-        frames.append(transform(pil_img))
+        
+        if apply_transform:
+            frames.append(transform(pil_img))
+        else:
+            frames.append(pil_img)
+            
         if len(frames) >= num_frames:
             break
     cap.release()
@@ -99,7 +104,10 @@ def extract_frames(video_bytes, ext="mp4", num_frames=32):
     if not frames:
         raise ValueError("No frames extracted from video")
 
-    return torch.stack(frames)  # (T, C, H, W)
+    if apply_transform:
+        return torch.stack(frames)  # (T, C, H, W)
+    else:
+        return frames  # list of PIL Images
 
 def create_slowfast_inputs(frames, alpha=4):
     # frames: (T, C, H, W)
@@ -134,10 +142,9 @@ def run_weapon_model(file_bytes):
     return (max(weapon_confs) if weapon_confs else 0.0, boxes_data)
 
 def run_weapon_model_video(video_bytes, ext="mp4", num_frames=8):
-    frames = extract_frames(video_bytes, ext, num_frames=num_frames)
+    frames = extract_frames(video_bytes, ext, num_frames=num_frames, apply_transform=False)
     weapon_confs = []
-    for frame in frames:  # each frame is (C,H,W)
-        img = transforms.ToPILImage()(frame)
+    for img in frames:  # each img is a raw PIL.Image
         results = weapon_model(img, device="cpu")
         for box in results[0].boxes:
             cls_id = int(box.cls.item())
