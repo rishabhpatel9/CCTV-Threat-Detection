@@ -119,8 +119,8 @@ def run_weapon_model_video(video_bytes, ext="mp4", num_frames=8):
         confs.extend([box.conf.item() for box in results[0].boxes])
     return max(confs) if confs else 0.0
 
-def run_violence_model_video(video_bytes):
-    frames = extract_frames(video_bytes, num_frames=32)
+def run_violence_model_video(video_bytes, ext="mp4"):
+    frames = extract_frames(video_bytes, ext=ext, num_frames=32)
     inputs = create_slowfast_inputs(frames)
     with torch.no_grad():
         logits = violence_model(inputs)
@@ -135,8 +135,8 @@ def run_anomaly_model(tensor):
         loss = torch.mean((outputs - features)**2, dim=1)
     return loss.item()
 
-def run_anomaly_model_video(video_bytes):
-    frames = extract_frames(video_bytes, num_frames=32)
+def run_anomaly_model_video(video_bytes, ext="mp4"):
+    frames = extract_frames(video_bytes, ext=ext, num_frames=32)
     clip = frames.permute(1,0,2,3).unsqueeze(0).to(device)  # (1, C, T, H, W)
     with torch.no_grad():
         features = i3d(clip)
@@ -148,15 +148,20 @@ def run_anomaly_model_video(video_bytes):
 # Rule-based fusion
 def fusion_rule(weapon_conf, violence_conf, anomaly_score,
                 weapon_thresh=0.5, weapon_warning_low=0.2,
-                violence_thresh=0.5, anomaly_thresh=0.5):
+                violence_thresh=0.5, violence_warning_low=0.2,
+                anomaly_thresh=0.5, anomaly_warning_low=0.2):
     if weapon_conf >= weapon_thresh:
-        return "Threat detected! : Weapon"
+        return "Weapon detected!"
     elif weapon_conf >= weapon_warning_low:
         return "Warning: Possible Weapon"
     elif violence_conf >= violence_thresh:
-        return "Threat detected! : Violence"
+        return "Violence detected!"
+    elif violence_conf >= violence_warning_low:
+        return "Warning: Possible Violence"
     elif anomaly_score >= anomaly_thresh:
-        return "Threat detected! : Anomaly"
+        return "Anomaly detected!"
+    elif anomaly_score >= anomaly_warning_low:
+        return "Warning: Possible Anomaly"
     else:
         return "Safe"
 

@@ -14,7 +14,7 @@ if uploaded_file:
         st.image(image, caption="Uploaded Frame", width=600)
 
     if st.button("Run Detection"):
-        files = {"file": uploaded_file.getbuffer()}
+        files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
         response = requests.post("http://localhost:8000/predict", files=files)
 
         try:
