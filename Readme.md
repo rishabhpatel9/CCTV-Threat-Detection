@@ -94,6 +94,7 @@ CCTV-Threat-Detection/
 │   ├── streamlit-app.py                    # UI to upload images/videos
 │   └── streamlit-webcam.py                 # Live stream analysis UI
 ├── Data/                                   # Data directory
+├── Example GIFs/                           # Example GIFs for Readme.md
 ├── Notebooks/                              # Jupyter Notebooks and Models
 │   ├── Rule-Based-Threat-Detection.ipynb
 │   ├── anamoly-detection-model.ipynb
@@ -113,6 +114,8 @@ CCTV-Threat-Detection/
 ---
 
 ## Installation
+
+### Local Installation
 
 Clone the repo:
 
@@ -137,6 +140,23 @@ Run Streamlit frontend:
 
 ```bash
 streamlit run app/streamlit_app.py
+```
+
+### Deployment with Docker
+
+You can easily spin up the entire pipeline (API + Frontend UI) using Docker and Docker Compose:
+
+1. Build and run the containers:
+   ```bash
+   docker-compose up --build
+   ```
+2. The services will be available at:
+   - **FastAPI Backend**: http://localhost:8000
+   - **Streamlit Frontend**: http://localhost:8501
+   
+To stop the services, run:
+```bash
+docker-compose down
 ```
 
 ---
