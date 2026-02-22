@@ -4,11 +4,10 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Frontend-red)
 ![YOLOv8](https://img.shields.io/badge/YOLOv8-Object%20Detection-blueviolet)
+![Docker](https://img.shields.io/badge/Docker-Containerization-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow)
 
 End-to-end multi-model computer vision and machine learning project for threat detection. It integrates spatial object detection, temporal action recognition, and generalized anomaly detection, aggregating them through a Fusion System and presenting the results via a user friendly UI.
-
-*(Note: Currently supports images; video support will be added in upcoming releases.)*
 
 ---
 
