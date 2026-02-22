@@ -7,13 +7,9 @@
 ![Docker](https://img.shields.io/badge/Docker-Containerization-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow)
 
-End-to-end multi-model computer vision and machine learning project for threat detection. It integrates spatial object detection, temporal action recognition, and generalized anomaly detection, aggregating them through a Fusion System and presenting the results via a user friendly UI.
-
----
-
 ## Overview
 
-The CCTV Threat Detection project is a functioning pipeline designed to handle CCTV (or other) footage analysis by combining multiple computer vision models to identify and score potential security threats. By synthesizing outputs from various detection modules (such as object tracking, temporal action recognition, and generalized anomaly detection), it provides a comprehensive security assessment framework, serving real-time inferences through a robust API and user friendly web interface.
+An intelligent end-to-end computer vision pipeline designed to analyze CCTV video feeds in real-time. By combining multiple AI models, the system automatically detects potential security threats such as drawn weapons, physical violence, and unusual activities, instantly flagging dangers and presenting the alerts through an easy-to-use web interface and robust API.
 
 ---
 
