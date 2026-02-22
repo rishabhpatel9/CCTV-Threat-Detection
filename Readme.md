@@ -21,9 +21,24 @@ The CCTV Threat Detection project is a functioning pipeline designed to handle C
 
 <div align="center">
 
-| <img src="Example GIFs/Weapon-example-compressed.gif" width="100%" alt="Weapon Example" /> | <img src="Example GIFs/Violence-example-compressed.gif" width="100%" alt="Violence Example" /> | <img src="Example GIFs/Safe-example-compressed.gif" width="100%" alt="Safe Example" /> |
-|:---:|:---:|:---:|
-| **Weapon Detection Example** | **Violence Detection Example** | **Safe Scenario Example** |
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="Example GIFs/Weapon-example-compressed.gif" width="100%" alt="Weapon Example" /></td>
+    <td align="center" width="33%"><img src="Example GIFs/Violence-example-compressed.gif" width="100%" alt="Violence Example" /></td>
+    <td align="center" width="33%"><img src="Example GIFs/Safe-example-compressed.gif" width="100%" alt="Safe Example" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Weapon Detection Example</b></td>
+    <td align="center"><b>Violence Detection Example</b></td>
+    <td align="center"><b>Safe Scenario Example</b></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><img src="Example GIFs/webcam-example.gif" width="90%" alt="Webcam Live Stream Detection Example" /></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><b>Webcam Live Stream Detection Example</b></td>
+  </tr>
+</table>
 
 </div>
 
