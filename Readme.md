@@ -31,10 +31,10 @@ The CCTV Threat Detection project is a functioning pipeline designed to handle C
 
 ## Datasets & Capabilities
 
-This project utilizes several datasets for model training and evaluation:
-1a. [Roboflow - Weapon Detection CCTV v3](https://universe.roboflow.com/weapon-detection-cctv/weapon-detection-cctv-v3-dataset) - **Weapons detection (in use)**
-1b. [Hugging Face - Simuletic/cctv-weapon-dataset](https://huggingface.co/datasets/Simuletic/cctv-weapon-dataset) - **Weapons detection (simuletic dataset) alternate model**
-2. [Kaggle - Smart-City CCTV Violence Detection Dataset (SCVD)](https://www.kaggle.com/datasets/toluwaniaremu/smartcity-cctv-violence-detection-dataset-scvd) - **Violence/fighting detection**
+This project utilizes several datasets for model training and evaluation:\
+1a. [Roboflow - Weapon Detection CCTV v3](https://universe.roboflow.com/weapon-detection-cctv/weapon-detection-cctv-v3-dataset) - **Weapons detection (in use)**\
+1b. [Hugging Face - Simuletic/cctv-weapon-dataset](https://huggingface.co/datasets/Simuletic/cctv-weapon-dataset) - **Weapons detection (simuletic dataset) alternate model**\
+2. [Kaggle - Smart-City CCTV Violence Detection Dataset (SCVD)](https://www.kaggle.com/datasets/toluwaniaremu/smartcity-cctv-violence-detection-dataset-scvd) - **Violence/fighting detection**\
 3. [Kaggle - UCF Crime Dataset](https://www.kaggle.com/datasets/odins0n/ucf-crime-dataset) - **Anomaly detection** (e.g., assault, burglary, arson, etc.)
 
 ---
