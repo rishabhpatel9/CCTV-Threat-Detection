@@ -18,6 +18,18 @@ The CCTV Threat Detection project is a functioning pipeline designed to handle C
 
 ---
 
+## Examples
+
+<div align="center">
+
+| <img src="Example GIFs/Weapon-example-compressed.gif" width="100%" alt="Weapon Example" /> | <img src="Example GIFs/Violence-example-compressed.gif" width="100%" alt="Violence Example" /> | <img src="Example GIFs/Safe-example-compressed.gif" width="100%" alt="Safe Example" /> |
+|:---:|:---:|:---:|
+| **Weapon Detection Example** | **Violence Detection Example** | **Safe Scenario Example** |
+
+</div>
+
+---
+
 ## Datasets & Capabilities
 
 This project utilizes several datasets for model training and evaluation:
