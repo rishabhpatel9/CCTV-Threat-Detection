@@ -17,7 +17,9 @@ if uploaded_file:
 
     if st.button("Run Detection"):
         files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
-        response = requests.post("http://localhost:8000/predict", files=files)
+        import os
+        api_url = os.environ.get("API_URL", "http://localhost:8000/predict")
+        response = requests.post(api_url, files=files)
 
         try:
             result = response.json()

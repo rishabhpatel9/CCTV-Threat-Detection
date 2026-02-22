@@ -46,7 +46,9 @@ api_thread = None
 
 def fetch_api(files_data):
     try:
-        response = requests.post("http://localhost:8000/predict", files=files_data, timeout=2.0)
+        import os
+        api_url = os.environ.get("API_URL", "http://localhost:8000/predict")
+        response = requests.post(api_url, files=files_data, timeout=2.0)
         if response.status_code == 200:
             result_container["result"] = response.json()
             result_container["error"] = False
