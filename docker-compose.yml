@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
     container_name: cctv-threat-api
     ports:
       - "8000:8000"
@@ -13,7 +15,9 @@ services:
     command: uvicorn api:app --host 0.0.0.0 --port 8000
 
   streamlit-app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     container_name: cctv-threat-streamlit-app
     ports:
       - "8501:8501"
@@ -21,13 +25,16 @@ services:
       - .:/app
     environment:
       - PYTHONUNBUFFERED=1
-      - API_URL=http://api:8000/predict
+      # Note: Update with your local or production API URL
+      - API_URL=http://localhost:8000/predict
     command: streamlit run app/streamlit-app.py --server.port 8501 --server.address 0.0.0.0
     depends_on:
       - api
 
   streamlit-webcam:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     container_name: cctv-threat-streamlit-webcam
     ports:
       - "8502:8502"
@@ -35,7 +42,8 @@ services:
       - .:/app
     environment:
       - PYTHONUNBUFFERED=1
-      - API_URL=http://api:8000/predict
+      # Note: Update with your local or production API URL
+      - API_URL=http://localhost:8000/predict
     command: streamlit run app/streamlit-webcam.py --server.port 8502 --server.address 0.0.0.0
     depends_on:
       - api
