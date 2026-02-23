@@ -38,6 +38,8 @@ An intelligent end-to-end computer vision pipeline designed to analyze CCTV vide
 
 </div>
 
+### *Try out the upload image/video demo [here](https://cctvdemo.rish.click/)*
+
 ---
 
 ## Datasets & Capabilities
