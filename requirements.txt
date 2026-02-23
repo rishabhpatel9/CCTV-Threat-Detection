@@ -11,6 +11,9 @@ matplotlib
 seaborn
 scikit-learn
 pillow
+fvcore
+av
+iopath
 
 #API & Web App
 fastapi
