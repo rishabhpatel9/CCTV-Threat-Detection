@@ -156,7 +156,7 @@ streamlit run app/streamlit_app.py
 
 ### Deployment with Docker
 
-You can easily spin up the entire pipeline (API + Frontend UI) using Docker and Docker Compose:
+You can easily spin up the entire pipeline (API + Frontend UIs) using the included `docker-compose.yml` file:
 
 1. Build and run the containers:
    ```bash
@@ -164,7 +164,8 @@ You can easily spin up the entire pipeline (API + Frontend UI) using Docker and 
    ```
 2. The services will be available at:
    - **FastAPI Backend**: http://localhost:8000
-   - **Streamlit Frontend**: http://localhost:8501
+   - **Streamlit Frontend (Image/Video Upload)**: http://localhost:8501
+   - **Streamlit Frontend (Webcam Live Stream)**: http://localhost:8502
    
 To stop the services, run:
 ```bash
