@@ -52,11 +52,11 @@ This project utilizes several datasets for model training and evaluation:\
 
 ## Project Features
 
-- **Spatial Object Detection:** Utilizes YOLOv8 to detect and track entities such as people and weapons in images.
-- **Temporal Action Recognition:** Employs an I3D model to analyze sequential motion and classify behaviors such as "violence" or "fighting".
+- **Spatial Object Detection (weapons/people):** Utilizes YOLOv8 to detect and track entities such as people and weapons in images.
+- **Temporal Action Recognition (violence):** Employs a SlowFast model to analyze sequential motion and classify behaviors such as "violence" or "fighting".
 - **Anomaly Detection:** Identifies unspecified unusual behaviors including Abuse, Arrest, Arson, Assault, Burglary, Explosion, RoadAccidents, Robbery, Shooting, Shoplifting, Stealing, and Vandalism.
-- **Fusion Layer (Threat Scoring):** Features an intelligent rule-based evaluation that synthesizes outputs from various detection modules into a final unified threat score.
-- **FastAPI Inference Backend:** A robust, high-performance API server processing images and executing simultaneous multi-model inferences.
+- **Fusion Layer (Threat Scoring):** Features an intelligent rule based evaluation that synthesizes outputs from various detection modules into a final unified threat score.
+- **FastAPI Inference Backend:** A robust, high performance API server processing images and executing simultaneous multi-model inferences.
 - **Streamlit Frontend Applications:** Streamlit frontend for live stream analysis and an alternate UI to upload images and videos to see the detection in action.
 
 ---
@@ -65,8 +65,8 @@ This project utilizes several datasets for model training and evaluation:\
 
 ```text
                ┌─────────────────────────────────────┐
-               │    Streamlit Frontend Apps          │
-               │ (Live Stream UI & Upload UI)        │
+               │      Streamlit Frontend Apps        │
+               │    (Live Stream UI & Upload UI)     │
                └─────────────────┬───────────────────┘
                                  │
                                  ▼
@@ -78,7 +78,8 @@ This project utilizes several datasets for model training and evaluation:\
              ┌───────────────────┼───────────────────┐
              ▼                   ▼                   ▼
 ┌──────────────────────┐ ┌───────────────┐ ┌──────────────────┐
-│ YOLOv8 Object Detect │ │  I3D Action   │ │ Anomaly Detection│
+│     YOLOv8 Object    │ │   SlowFast    │ │      Anomaly     │
+│      Detection       │ │    Action     │ │     Detection    │
 │  (People, Weapons)   │ │  Recognition  │ │ (Abuse, Arson,   │
 │                      │ │  (Violence)   │ │  Burglary, etc.) │
 └────────────┬─────────┘ └───────┬───────┘ └─────────┬────────┘
@@ -86,14 +87,14 @@ This project utilizes several datasets for model training and evaluation:\
              └───────────────────┼───────────────────┘
                                  ▼
                ┌─────────────────────────────────────┐
-               │      Fusion Layer Threat Scoring    │
-               │    (Rules & Ensembled Threat Score) │
+               │     Fusion Layer Threat Scoring     │
+               │   (Rules & Ensembled Threat Score)  │
                └─────────────────┬───────────────────┘
                                  │
                                  ▼
                ┌─────────────────────────────────────┐
                │      Alert & Monitoring System      │
-               │     (UI feedback, logs, APIs)       │
+               │      (UI feedback, logs, APIs)      │
                └─────────────────────────────────────┘
 ```
 
