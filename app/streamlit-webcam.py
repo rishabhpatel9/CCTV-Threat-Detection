@@ -3,131 +3,115 @@ import cv2
 import requests
 from PIL import Image
 import io
-import time
+import os
+import av
 import threading
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfiguration
 
 st.set_page_config(page_title="Real-Time Threat Detection", layout="wide")
 st.title("Live Webcam Threat Detection")
 st.write("This app captures live webcam feed and sends frames to the fusion layer API for threat detection.")
-st.write("Click the checkbox below to start the detection. If necessary, allow camera access.")
+st.write("Click 'START' to start the webcam, and ALLOW camera access when prompted by the browser.")
 
-# Option to start/stop the webcam
-run = st.checkbox("Turn on Webcam")
-status_text = st.empty()
+RTC_CONFIGURATION = RTCConfiguration(
+    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+)
 
-if not run:
-    status_text.info("Webcam stopped.")
+class VideoProcessor(VideoTransformerBase):
+    def __init__(self):
+        self.frame_skip = 5
+        self.frame_count = 0
+        self.latest_boxes = []
+        self.api_thread = None
+        self.result_container = {"result": None, "error": False, "new_data": False}
+        self.api_url = os.environ.get("API_URL", "http://localhost:8000/predict")
 
-# Two columns: one for the video feed and one for the results
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    st.subheader("Live Feed")
-    # Video frame placeholder
-    frame_window = st.image([])
-
-with col2:
-    st.subheader("Real-Time Analysis")
-    # Placeholders for metrics to update dynamically
-    decision_placeholder = st.empty()
-    st.write("---")
-    weapon_placeholder = st.empty()
-    violence_placeholder = st.empty()
-    anomaly_placeholder = st.empty()
-
-# Open the default camera (index 0)
-if run:
-    camera = cv2.VideoCapture(0)
-
-# To avoid sending every single frame and overloading the API, adding a small delay
-frame_skip = 5  # send every 5th frame to the API
-frame_count = 0
-
-# Keep track of the last known boxes to draw them smoothly between API calls
-latest_boxes = []
-
-# Container to hold results from the background thread
-result_container = {"result": None, "error": False, "new_data": False}
-api_thread = None
-
-def fetch_api(files_data):
-    try:
-        import os
-        api_url = os.environ.get("API_URL", "http://localhost:8000/predict")
-        response = requests.post(api_url, files=files_data, timeout=2.0)
-        if response.status_code == 200:
-            result_container["result"] = response.json()
-            result_container["error"] = False
-            result_container["new_data"] = True
-    except requests.exceptions.RequestException:
-        result_container["error"] = True
-        result_container["new_data"] = True
-
-while run:
-    success, frame = camera.read()
-    if not success:
-        st.error("Failed to read from webcam.")
-        break
-    
-    # Convert color space from BGR (OpenCV default) to RGB (Streamlit/Image default)
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    
-    for box in latest_boxes:
-        x1, y1, x2, y2 = box['x1'], box['y1'], box['x2'], box['y2']
-        conf = box['conf']
-        class_name = box.get('class_name', 'Weapon').capitalize()
-        
-        # Draw red rectangle for weapon, green for person
-        color = (0, 255, 0) if class_name.lower() == 'person' else (255, 0, 0)
-        
-        cv2.rectangle(frame_rgb, (x1, y1), (x2, y2), color, 2)
-        # Add confidence label
-        cv2.putText(frame_rgb, f"{class_name}: {conf:.2f}", (x1, y1 - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-    # Update image placeholder with the current frame
-    frame_window.image(frame_rgb)
-    
-    # Process only every N frames to keep it running smoothly
-    if frame_count % frame_skip == 0:
-        # Only start a new thread if one isn't currently running
-        if api_thread is None or not api_thread.is_alive():
-            # Convert frame to bytes and send to the current API
-            img = Image.fromarray(frame_rgb)
-            buf = io.BytesIO()
-            img.save(buf, format="JPEG")
-            file_bytes = buf.getvalue()
-            
+    def fetch_api(self, file_bytes):
+        try:
             files = {"file": ("frame.jpg", file_bytes, "image/jpeg")}
-            
-            api_thread = threading.Thread(target=fetch_api, args=(files,))
-            api_thread.start()
+            response = requests.post(self.api_url, files=files, timeout=2.0)
+            if response.status_code == 200:
+                self.result_container["result"] = response.json()
+                self.result_container["error"] = False
+                self.result_container["new_data"] = True
+        except Exception:
+            self.result_container["error"] = True
+            self.result_container["new_data"] = True
 
-    # Update UI based on whatever the latest result is
-    if result_container["new_data"]:
-        if result_container["error"]:
-            decision_placeholder.error("API disconnected or timed out.")
-        elif result_container["result"]:
-            result = result_container["result"]
+    def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
+        img = frame.to_ndarray(format="bgr24")
+        
+        result = self.result_container.get("result", {})
+        if result:
+            self.latest_boxes = result.get("weapon_boxes", [])
             decision = result.get("fusion_decision", "Unknown")
-            latest_boxes = result.get("weapon_boxes", [])
+            weapon_conf = result.get("weapon_conf", 0.0)
+            violence_conf = result.get("violence_conf", 0.0)
+            anomaly_score = result.get("anomaly_score", 0.0)
             
-            # Update UI with color coding based on severity
-            if "Safe" in decision:
-                decision_placeholder.success(f"**Status:** {decision}")
-            elif "Warning" in decision:
-                decision_placeholder.warning(f"**Status:** {decision}")
-            else:
-                decision_placeholder.error(f"**Status:** {decision}")
+            # Draw metrics on the top left
+            cv2.putText(img, f"Status: {decision}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 3)
+            # Adjust color based on decision
+            status_color = (0, 255, 0)
+            if "Warning" in decision: status_color = (0, 255, 255)
+            elif "Critical" in decision or "Threat" in decision: status_color = (0, 0, 255)
             
-            # Update metrics dynamically
-            weapon_placeholder.metric("Weapon Confidence", f"{result.get('weapon_conf', 0.0):.2f}")
-            violence_placeholder.metric("Violence Confidence", f"{result.get('violence_conf', 0.0):.2f}")
-            anomaly_placeholder.metric("Anomaly Score", f"{result.get('anomaly_score', 0.0):.2f}")
+            cv2.putText(img, f"Status: {decision}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2)
             
-        result_container["new_data"] = False
-            
-    frame_count += 1
+            # Weapon, Violence, Anomaly confidences
+            cv2.putText(img, f"Weapon Conf: {weapon_conf:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 3)
+            cv2.putText(img, f"Weapon Conf: {weapon_conf:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+            cv2.putText(img, f"Violence Conf: {violence_conf:.2f}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 3)
+            cv2.putText(img, f"Violence Conf: {violence_conf:.2f}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+            cv2.putText(img, f"Anomaly Score: {anomaly_score:.2f}", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 3)
+            cv2.putText(img, f"Anomaly Score: {anomaly_score:.2f}", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+        # Draw bounding boxes
+        for box in self.latest_boxes:
+            x1, y1, x2, y2 = box['x1'], box['y1'], box['x2'], box['y2']
+            conf = box['conf']
+            class_name = box.get('class_name', 'Weapon').capitalize()
+            # BGR format: green is (0, 255, 0), red is (0, 0, 255)
+            color = (0, 255, 0) if class_name.lower() == 'person' else (0, 0, 255)
+            cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(img, f"{class_name}: {conf:.2f}", (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+        if self.frame_count % self.frame_skip == 0:
+            if self.api_thread is None or not self.api_thread.is_alive():
+                # Convert BGR to RGB for API
+                img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                pil_img = Image.fromarray(img_rgb)
+                buf = io.BytesIO()
+                pil_img.save(buf, format="JPEG")
+                file_bytes = buf.getvalue()
+                
+                self.api_thread = threading.Thread(target=self.fetch_api, args=(file_bytes,))
+                self.api_thread.start()
+                
+        self.frame_count += 1
+        
+        return av.VideoFrame.from_ndarray(img, format="bgr24")
+
+st.write("---")
+# Provide a centered column for the webcam
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    webrtc_streamer(
+        key="webcam",
+        video_processor_factory=VideoProcessor,
+        rtc_configuration=RTC_CONFIGURATION,
+        media_stream_constraints={"video": True, "audio": False},
+        async_processing=True
+    )
     
-    # Add a tiny sleep to let Streamlit catch its breath and render the UI
-    time.sleep(0.01)
+st.markdown("""
+<style>
+/* Optional styling to make webcam frame look better */
+#root > div:nth-child(1) > div > div > div > div > section > div {
+    padding-top: 2rem;
+}
+</style>
+""", unsafe_allow_html=True)

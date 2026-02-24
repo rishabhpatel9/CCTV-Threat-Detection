@@ -21,5 +21,6 @@ pydantic
 python-multipart
 uvicorn
 streamlit
+streamlit-webrtc
 requests
 PyYAML
