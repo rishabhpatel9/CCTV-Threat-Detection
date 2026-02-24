@@ -168,10 +168,21 @@ git lfs install
 git lfs pull
 ```
 
-1. Build and run the containers:
+1. **Build and run the containers:**
+
+   **For systems WITHOUT an NVIDIA GPU (Default - Fast & Lightweight):**
    ```bash
    docker-compose up --build
    ```
+   *Note: This automatically downloads a lightweight, CPU-only version of PyTorch to save several gigabytes of disk space and download time.*
+
+   **For systems WITH an NVIDIA GPU:**
+   ```bash
+   docker-compose build --build-arg USE_GPU=true
+   docker-compose up -d
+   ```
+   *Note: This downloads the full PyTorch wheel with CUDA/cuDNN support for hardware acceleration.*
+
 2. The services will be available at:
    - **FastAPI Backend**: http://localhost:8000
    - **Streamlit Frontend (Image/Video Upload)**: http://localhost:8501

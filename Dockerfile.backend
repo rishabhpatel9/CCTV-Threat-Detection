@@ -10,8 +10,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+ARG USE_GPU=false
+RUN --mount=type=cache,target=/root/.cache/pip \
+    if [ "$USE_GPU" = "false" ] ; then \
+    pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu ; \
+    fi
 
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 COPY . .
 
 RUN git lfs install && git lfs pull

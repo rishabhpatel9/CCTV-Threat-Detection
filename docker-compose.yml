@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+      args:
+        USE_GPU: ${USE_GPU:-false}
     container_name: cctv-threat-api
     ports:
       - "8000:8000"
