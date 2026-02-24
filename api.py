@@ -1,3 +1,5 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from fastapi import FastAPI, UploadFile
 from pydantic import BaseModel
 import torch
@@ -71,7 +73,7 @@ def preprocess_image(contents, num_frames=8):
     return clip.unsqueeze(0).to(device)  # (1, 3, T, H, W)
 
 # For videos: extract frames
-def extract_frames(video_bytes, ext="mp4", num_frames=32, apply_transform=True):
+def extract_frames(video_bytes, ext="mp4", num_frames=32, apply_transform=True, max_dim=320):
     tmp_path = f"__pycache__/temp_video.{ext}"
     with open(tmp_path, "wb") as f:
         f.write(video_bytes)
@@ -89,6 +91,13 @@ def extract_frames(video_bytes, ext="mp4", num_frames=32, apply_transform=True):
         ret, frame = cap.read()
         if not ret:
             break
+        
+        # Resize frame early to save memory and speed up subsequent steps
+        h, w = frame.shape[:2]
+        if max(h, w) > max_dim:
+            scale = max_dim / max(h, w)
+            frame = cv2.resize(frame, (int(w * scale), int(h * scale)))
+            
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(frame)
         
@@ -119,7 +128,7 @@ def create_slowfast_inputs(frames, alpha=4):
 # Inference Functions
 def run_weapon_model(file_bytes):
     image = Image.open(io.BytesIO(file_bytes)).convert("RGB")
-    results = weapon_model(image, device="cpu")
+    results = weapon_model(image, device="cpu", imgsz=320)
     
     boxes_data = []
     weapon_confs = []
@@ -141,21 +150,20 @@ def run_weapon_model(file_bytes):
             
     return (max(weapon_confs) if weapon_confs else 0.0, boxes_data)
 
-def run_weapon_model_video(video_bytes, ext="mp4", num_frames=8):
-    frames = extract_frames(video_bytes, ext, num_frames=num_frames, apply_transform=False)
+def run_weapon_model_video(frames):
     weapon_confs = []
-    for img in frames:  # each img is a raw PIL.Image
-        results = weapon_model(img, device="cpu")
-        for box in results[0].boxes:
+    results = weapon_model(frames, device="cpu", imgsz=320)
+    for res in results:
+        for box in res.boxes:
             cls_id = int(box.cls.item())
             class_name = weapon_model.names.get(cls_id, "unknown")
             if class_name != "person":
                 weapon_confs.append(box.conf.item())
     return max(weapon_confs) if weapon_confs else 0.0
 
-def run_violence_model_video(video_bytes, ext="mp4"):
-    frames = extract_frames(video_bytes, ext=ext, num_frames=32)
-    inputs = create_slowfast_inputs(frames)
+def run_violence_model_video(frames):
+    transformed_frames = torch.stack([transform(img) for img in frames])
+    inputs = create_slowfast_inputs(transformed_frames)
     with torch.no_grad():
         logits = violence_model(inputs)
         probs = torch.softmax(logits, dim=1)
@@ -169,9 +177,9 @@ def run_anomaly_model(tensor):
         loss = torch.mean((outputs - features)**2, dim=1)
     return loss.item()
 
-def run_anomaly_model_video(video_bytes, ext="mp4"):
-    frames = extract_frames(video_bytes, ext=ext, num_frames=32)
-    clip = frames.permute(1,0,2,3).unsqueeze(0).to(device)  # (1, C, T, H, W)
+def run_anomaly_model_video(frames):
+    transformed_frames = torch.stack([transform(img) for img in frames])
+    clip = transformed_frames.permute(1,0,2,3).unsqueeze(0).to(device)  # (1, C, T, H, W)
     with torch.no_grad():
         features = i3d(clip)
         features = features.view(features.size(0), -1)
@@ -207,6 +215,8 @@ class FusionResponse(BaseModel):
     weapon_boxes: list = []
 
 # API Endpoint
+executor = ThreadPoolExecutor(max_workers=3)
+
 @app.post("/predict", response_model=FusionResponse)
 async def predict(file: UploadFile):
     try:
@@ -216,10 +226,22 @@ async def predict(file: UploadFile):
         ext = filename.split(".")[-1]
 
         if filename.endswith((".mp4", ".avi", ".mov")):
-            weapon_conf = run_weapon_model_video(contents, ext)
+            loop = asyncio.get_event_loop()
+            
+            # Extract 16 frames once
+            frames = await loop.run_in_executor(
+                executor, extract_frames, contents, ext, 16, False
+            )
+            
+            # Run inference concurrently
+            weapon_task = loop.run_in_executor(executor, run_weapon_model_video, frames)
+            violence_task = loop.run_in_executor(executor, run_violence_model_video, frames)
+            anomaly_task = loop.run_in_executor(executor, run_anomaly_model_video, frames)
+            
+            weapon_conf, violence_conf, anomaly_score = await asyncio.gather(
+                weapon_task, violence_task, anomaly_task
+            )
             weapon_boxes = [] # Currently video returns a single max conf over frames
-            violence_conf = run_violence_model_video(contents, ext)
-            anomaly_score = run_anomaly_model_video(contents, ext)
         else:
             tensor = preprocess_image(contents)
             weapon_conf, weapon_boxes = run_weapon_model(contents)
