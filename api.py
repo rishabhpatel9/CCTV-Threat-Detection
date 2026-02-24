@@ -24,7 +24,7 @@ weapon_model = YOLO("Notebooks/weapon-detection-model-mark2.pt")
 # Load Violence detection model (SlowFast)
 violence_model = torch.hub.load('facebookresearch/pytorchvideo', 'slowfast_r50', pretrained=False)
 violence_model.blocks[-1].proj = nn.Linear(violence_model.blocks[-1].proj.in_features, 3)
-violence_model.load_state_dict(torch.load(r"Notebooks/violence-detection-slowfast-model.pth", map_location=device))
+violence_model.load_state_dict(torch.load(r"Notebooks/violence-detection-slowfast-model.pth", map_location=device, weights_only=False))
 violence_model.eval().to(device)
 
 # Load I3D feature extractor for anomaly detection
@@ -55,7 +55,7 @@ class Autoencoder(nn.Module):
 
 # Load Anomaly detection model (Autoencoder)
 anomaly_model = Autoencoder().to(device)
-anomaly_model.load_state_dict(torch.load("Notebooks/anamoly-detection-model-epoch10.pth", map_location=device))
+anomaly_model.load_state_dict(torch.load("Notebooks/anamoly-detection-model-epoch10.pth", map_location=device, weights_only=False))
 anomaly_model.eval()
 
 # Preprocessing
