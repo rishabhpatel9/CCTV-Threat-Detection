@@ -23,4 +23,5 @@ uvicorn
 streamlit
 streamlit-webrtc
 requests
+twilio
 PyYAML

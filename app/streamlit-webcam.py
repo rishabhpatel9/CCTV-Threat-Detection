@@ -13,8 +13,24 @@ st.title("Live Webcam Threat Detection")
 st.write("This app captures live webcam feed and sends frames to the fusion layer API for threat detection.")
 st.write("Click 'START' to start the webcam, and ALLOW camera access when prompted by the browser.")
 
+@st.cache_resource
+def get_ice_servers():
+    """Use Twilio's TURN server to allow WebRTC streams over Cloudflare (which blocks UDP)."""
+    try:
+        from twilio.rest import Client
+        account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+        auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+        if account_sid and auth_token:
+            client = Client(account_sid, auth_token)
+            token = client.tokens.create()
+            return token.ice_servers
+    except Exception as e:
+        print("Twilio TURN server error:", e)
+        
+    return [{"urls": ["stun:stun.l.google.com:19302"]}]
+
 RTC_CONFIGURATION = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+    {"iceServers": get_ice_servers()}
 )
 
 class VideoProcessor(VideoTransformerBase):
