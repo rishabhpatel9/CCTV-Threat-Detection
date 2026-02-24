@@ -19,7 +19,7 @@ RUN git lfs install && git lfs pull
 EXPOSE 8501
 
 # For uploaded video/image frontend
-CMD ["streamlit", "run", "app/streamlit-app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+# CMD ["streamlit", "run", "app/streamlit-app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
 
 # For webcam frontend
-# CMD ["streamlit", "run", "app/streamlit-webcam.py", "--server.port", "8502", "--server.address", "0.0.0.0"]
+CMD ["streamlit", "run", "app/streamlit-webcam.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
