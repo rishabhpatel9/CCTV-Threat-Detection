@@ -8,10 +8,15 @@ import threading
 
 st.set_page_config(page_title="Real-Time Threat Detection", layout="wide")
 st.title("Live Webcam Threat Detection")
-st.write("This app captures live webcam feed and sends frames to the fusion layer API.")
+st.write("This app captures live webcam feed and sends frames to the fusion layer API for threat detection.")
+st.write("Click the checkbox below to start the detection. If necessary, allow camera access.")
 
 # Option to start/stop the webcam
 run = st.checkbox("Turn on Webcam")
+status_text = st.empty()
+
+if not run:
+    status_text.info("Webcam stopped.")
 
 # Two columns: one for the video feed and one for the results
 col1, col2 = st.columns([2, 1])
@@ -31,7 +36,8 @@ with col2:
     anomaly_placeholder = st.empty()
 
 # Open the default camera (index 0)
-camera = cv2.VideoCapture(0)
+if run:
+    camera = cv2.VideoCapture(0)
 
 # To avoid sending every single frame and overloading the API, adding a small delay
 frame_skip = 5  # send every 5th frame to the API
@@ -125,8 +131,3 @@ while run:
     
     # Add a tiny sleep to let Streamlit catch its breath and render the UI
     time.sleep(0.01)
-
-else:
-    st.write("Webcam stopped.")
-    if camera.isOpened():
-        camera.release()

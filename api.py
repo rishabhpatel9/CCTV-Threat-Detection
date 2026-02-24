@@ -73,7 +73,7 @@ def preprocess_image(contents, num_frames=8):
     return clip.unsqueeze(0).to(device)  # (1, 3, T, H, W)
 
 # For videos: extract frames
-def extract_frames(video_bytes, ext="mp4", num_frames=32, apply_transform=True, max_dim=320):
+def extract_frames(video_bytes, ext="mp4", num_frames=16, apply_transform=True, max_dim=320):
     tmp_path = f"__pycache__/temp_video.{ext}"
     with open(tmp_path, "wb") as f:
         f.write(video_bytes)
