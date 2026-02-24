@@ -5,16 +5,13 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
-    git \
-    git-lfs \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY requirements-frontend.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-frontend.txt
 COPY . .
 
-RUN git lfs install && git lfs pull
 # Port for Streamlit
 EXPOSE 8501
 
