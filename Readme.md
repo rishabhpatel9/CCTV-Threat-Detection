@@ -131,11 +131,13 @@ CCTV-Threat-Detection/
 
 ### Local Installation
 
-Clone the repo:
+Clone the repo and download the large machine learning model files:
 
 ```bash
 git clone https://github.com/rishabhpatel9/CCTV-Threat-Detection.git
 cd CCTV-Threat-Detection
+git lfs install
+git lfs pull
 ```
 
 Install dependencies:
@@ -159,6 +161,12 @@ streamlit run app/streamlit_app.py
 ### Deployment with Docker
 
 You can easily spin up the entire pipeline (API + Frontend UIs) using the included `docker-compose.yml` file:
+
+**Important Data Prerequisite:** Before building the containers, you must pull the actual large `.pth` model files (Docker mounts your local folder, so these must be downloaded on your host machine first):
+```bash
+git lfs install
+git lfs pull
+```
 
 1. Build and run the containers:
    ```bash
