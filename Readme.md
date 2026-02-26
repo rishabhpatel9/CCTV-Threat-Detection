@@ -152,10 +152,18 @@ Run FastAPI backend:
 uvicorn api:app --reload
 ```
 
-Run Streamlit frontend:
+Run Streamlit Webcam based frontend:
 
 ```bash
-streamlit run app/streamlit_app.py
+streamlit run app/streamlit-webcam.py
+```
+
+*OR*
+
+Run Streamlit upload image/video frontend:
+
+```bash
+streamlit run app/streamlit-app.py
 ```
 
 ### Deployment with Docker
