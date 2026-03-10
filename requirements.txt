@@ -1,5 +1,8 @@
-#uncomment datasets if you're training the model without downloading the dataset manually
-#datasets
+# Unified requirements for local development.
+# Docker deployments use requirements-backend.txt and requirements-frontend.txt.
+
+# Uncomment datasets if you're training the model without downloading the dataset manually.
+# datasets
 
 #Threat Detection Models & Utils
 ultralytics

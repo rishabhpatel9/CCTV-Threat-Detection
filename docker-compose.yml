@@ -26,7 +26,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       # Note: Update with your local or production API URL
-      - API_URL=http://localhost:8000/predict
+      - API_URL=${API_URL:-http://localhost:8000/predict}
     command: streamlit run app/streamlit-app.py --server.port 8501 --server.address 0.0.0.0
     depends_on:
       - api
@@ -43,7 +43,9 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       # Note: Update with your local or production API URL
-      - API_URL=http://localhost:8000/predict
+      - API_URL=${API_URL:-http://localhost:8000/predict}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
     command: streamlit run app/streamlit-webcam.py --server.port 8502 --server.address 0.0.0.0
     depends_on:
       - api

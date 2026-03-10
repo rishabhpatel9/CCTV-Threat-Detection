@@ -4,6 +4,7 @@ requests
 twilio
 pillow
 opencv-python
+numpy
 av
 pydantic
 PyYAML

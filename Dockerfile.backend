@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     git \
     git-lfs \
     && rm -rf /var/lib/apt/lists/*
-COPY requirements.txt .
+COPY requirements-backend.txt .
 
 ARG USE_GPU=false
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu ; \
     fi
 
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-backend.txt
 COPY . .
 
 RUN git lfs install && git lfs pull
