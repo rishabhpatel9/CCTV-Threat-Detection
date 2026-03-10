@@ -146,6 +146,13 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+Prepare environment variables:
+
+```bash
+cp .env.example .env
+# Edit .env with your credentials (e.g., Twilio for webcam)
+```
+
 Run FastAPI backend:
 
 ```bash
@@ -191,7 +198,14 @@ git lfs pull
    ```
    *Note: This downloads the full PyTorch wheel with CUDA/cuDNN support for hardware acceleration.*
 
-2. The services will be available at:
+2. **Prepare Environment Variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env to set USE_GPU=true/false and add Twilio credentials
+   ```
+
+3. **Port Mapping:**
+   The services will be available at:
    - **FastAPI Backend**: http://localhost:8000
    - **Streamlit Frontend (Image/Video Upload)**: http://localhost:8501
    - **Streamlit Frontend (Webcam Live Stream)**: http://localhost:8502
