@@ -4,3 +4,4 @@ Release-notes.md
 /Notebooks/yolo26n.pt
 /__pycache__/
 /Example GIFs/media
+.env
