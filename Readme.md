@@ -107,7 +107,7 @@ CCTV-Threat-Detection/
 ├── app/
 │   ├── streamlit-app.py                    # UI to upload images/videos
 │   └── streamlit-webcam.py                 # Live stream analysis UI
-├── Data/                                   # Data directory
+├── Data/                                   # Dataset directory
 ├── Example GIFs/                           # Example GIFs for Readme.md
 ├── Notebooks/                              # Jupyter Notebooks and Models
 │   ├── Rule-Based-Threat-Detection.ipynb
@@ -120,8 +120,14 @@ CCTV-Threat-Detection/
 ├── .gitattributes
 ├── .gitignore
 ├── api.py                                  # FastAPI backend
+├── docker-compose.yml
+├── Dockerfile.backend
+├── Dockerfile.frontend
+├── example.env
 ├── LICENSE
 ├── Readme.md
+├── requirements-backend.txt
+├── requirements-frontend.txt
 └── requirements.txt
 ```
 
