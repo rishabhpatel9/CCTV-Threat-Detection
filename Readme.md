@@ -155,7 +155,7 @@ pip install -r requirements.txt
 Prepare environment variables:
 
 ```bash
-cp .env.example .env
+cp example.env .env
 # Edit .env with your credentials (e.g., Twilio for webcam)
 ```
 
@@ -206,7 +206,7 @@ git lfs pull
 
 2. **Prepare Environment Variables:**
    ```bash
-   cp .env.example .env
+   cp example.env .env
    # Edit .env to set USE_GPU=true/false and add Twilio credentials
    ```
 
