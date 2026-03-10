@@ -1,3 +1,12 @@
+# Python / IDE
+/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.vscode/
+.idea/
+
+# Data & Models
 /Data/
 Release-notes.md
 /Notebooks/yolov8n.pt
