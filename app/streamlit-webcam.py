@@ -8,14 +8,14 @@ import av
 import threading
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfiguration
 
-st.set_page_config(page_title="Real-Time Threat Detection", layout="wide")
+st.set_page_config(page_title="Real Time Threat Detection", layout="wide")
 st.title("Live Webcam Threat Detection")
 st.write("This app captures live webcam feed and sends frames to the fusion layer API for threat detection.")
 st.write("Click 'START' to start the webcam, and ALLOW camera access when prompted by the browser.")
 
 @st.cache_resource
 def get_ice_servers():
-    """Use Twilio's TURN server to allow WebRTC streams over Cloudflare (which blocks UDP)."""
+    # Use Twilio's TURN server to allow WebRTC streams over Cloudflare (which blocks UDP.
     try:
         from twilio.rest import Client
         account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
