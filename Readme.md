@@ -232,16 +232,12 @@ docker-compose down
 
 ## Future Work
 
-
-- **Dockerized Deployment**: Containerize the FastAPI backend and Streamlit frontend using Docker and Docker Compose for easier deployment and scalability.
-- **Render Deployment**: Deploy the FastAPI backend and Streamlit frontend on Render for easy cloud hosting and public accessibility.
-- **Improve violence-detection-slowfast model** by training on SCVD + UCF-Crime datasets.
-- **Violence/Fighting Detection Model** - Use YOLOv8 as a preprocessing step to detect and crop people from frames before feeding them into an action recognition model. This can improve accuracy by focusing on human regions instead of background noise.
-- **Anomaly/Loitering Detection Model** - YOLOv8 can again be used as a supporting module to detect people and track them with DeepSORT. Feed tracked trajectories into anomaly detection (e.g., loitering = person stays in same region too long). This helps with object/person localization.
-- **Vehicle Detection**: use COCO/Open Images for “car,” “truck,” “bus” classes.
-- **Smoke/Fire Detection (Environmental Safety)**: Could use datasets like FireNet or Smoke Detection Dataset (Kaggle).
-- **Abandoned Object Detection**: use COCO/Open Images for “bag/backpack” detection and then apply anomaly logic (bag present without person).
-- **Restricted Zones / Tripwires**: This is a post-processing feature to be added later by defining geofences in Streamlit/FastAPI pipeline.
+- **Indoor & Home Security Focus**: Optimize the deployment experience for indoor and home environments. This includes building comprehensive management dashboards and real time alert systems (SMS/Push notifications) to provide a professional, user friendly security experience.
+- **Violence/Fighting Detection Pipeline**: Implement YOLOv8 as a preprocessing step to detect and crop person instances from frames before feeding them into action recognition models. This will improve accuracy by focusing purely on human interactions and reducing background interference.
+- **Loitering & Advanced Anomaly Detection**: Integrate object tracking (e.g., DeepSORT) with YOLOv8 to analyze person trajectories, enabling the detection of loitering and other movement-based anomalies.
+- **Environmental & Vehicle Safety**: Extend detection capabilities to include vehicle classes and environmental threats like smoke or fire.
+- **Restricted Zones & Tripwires**: Implement post processing logic to allow users to define virtual geofences and tripwires within the video feed, triggering alerts based on spatial violations.
+- **Abandoned Object Detection**: Develop logic to identify stationary items like bags or backpacks in public spaces, flagging them as potential security risks when left unattended.
 
 ---
 
