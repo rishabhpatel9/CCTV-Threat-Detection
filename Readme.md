@@ -223,13 +223,6 @@ docker-compose down
 
 ---
 
-## Releases
-
-* **v1.0.0** → Initial Version with core pipeline and Streamlit dashboard. Analyzes uploaded images for weapons, violence, and anomalies.
-* **v2.0.0** → Updated Version with video processing + image processing pipeline and a secondary Streamlit dashboard for live stream analysis.
-
----
-
 ## Future Work
 
 - **Indoor & Home Security Focus**: Optimize the deployment experience for indoor and home environments. This includes building comprehensive management dashboards and real time alert systems (SMS/Push notifications) to provide a professional, user friendly security experience.
