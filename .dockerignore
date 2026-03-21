@@ -1,0 +1,44 @@
+# Repository files
+.git
+.gitattributes
+.gitignore
+
+# Python files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+env/
+.env
+
+# Project specific large directories
+Data/
+Example GIFs/
+Notebooks/
+# Negate weights if they must stay in Notebooks (Temporary solution)
+!Notebooks/*.pt
+!Notebooks/*.pth
+# Re-ignore everything else in Notebooks
+Notebooks/**/*.ipynb
+Notebooks/**/*.xml
+Notebooks/**/*.json
+Notebooks/**/*.png
+Notebooks/**/*.jpg
+Notebooks/**/*.csv
+Notebooks/runs/
+
+# Build artifacts and tools
+Dockerfile.backend
+Dockerfile.frontend
+docker-compose.yml
+Project_Expansion_Roadmap.md
+Readme.md
+Release-notes.md
+LICENSE
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
