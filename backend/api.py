@@ -9,22 +9,24 @@ from PIL import Image
 import io
 import cv2
 from ultralytics import YOLO
+import tempfile
+import os
 
 app = FastAPI()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load Weapons detection model (YOLOv8 trained on weapon detection cctv v3 dataset.v1-weapon_detection_in_cctv.yolov8 from roboflow)
-weapon_model = YOLO("Notebooks/weapon-detection-model-mark2.pt")
+weapon_model = YOLO("models/weapon-detection-model-mark2.pt")
 
 # OR
 
 # Load Weapons detection model (YOLOv8 trained on simuletic weapon detection dataset)
-#weapon_model = YOLO("Notebooks/weapon-detection-model-simuletic.pt")
+#weapon_model = YOLO("models/weapon-detection-model-simuletic.pt")
 
 # Load Violence detection model (SlowFast)
 violence_model = torch.hub.load('facebookresearch/pytorchvideo', 'slowfast_r50', pretrained=False)
 violence_model.blocks[-1].proj = nn.Linear(violence_model.blocks[-1].proj.in_features, 3)
-violence_model.load_state_dict(torch.load(r"Notebooks/violence-detection-slowfast-model.pth", map_location=device, weights_only=False))
+violence_model.load_state_dict(torch.load(r"models/violence-detection-slowfast-model.pth", map_location=device, weights_only=False))
 violence_model.eval().to(device)
 
 # Load I3D feature extractor for anomaly detection
@@ -55,7 +57,7 @@ class Autoencoder(nn.Module):
 
 # Load Anomaly detection model (Autoencoder)
 anomaly_model = Autoencoder().to(device)
-anomaly_model.load_state_dict(torch.load("Notebooks/anamoly-detection-model-epoch10.pth", map_location=device, weights_only=False))
+anomaly_model.load_state_dict(torch.load("models/anamoly-detection-model-epoch10.pth", map_location=device, weights_only=False))
 anomaly_model.eval()
 
 # Preprocessing
@@ -74,41 +76,47 @@ def preprocess_image(contents, num_frames=8):
 
 # For videos: extract frames
 def extract_frames(video_bytes, ext="mp4", num_frames=16, apply_transform=True, max_dim=320):
-    tmp_path = f"__pycache__/temp_video.{ext}"
-    with open(tmp_path, "wb") as f:
-        f.write(video_bytes)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as tmp:
+        tmp.write(video_bytes)
+        tmp_path = tmp.name
 
-    cap = cv2.VideoCapture(tmp_path)
-    if not cap.isOpened():
-        raise ValueError(f"Video file {tmp_path} could not be opened. Check codec/extension.")
+    try:
+        cap = cv2.VideoCapture(tmp_path)
+        if not cap.isOpened():
+            raise ValueError(f"Video file {tmp_path} could not be opened. Check codec/extension.")
 
-    frames = []
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    step = max(total_frames // num_frames, 1)
+        frames = []
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        step = max(total_frames // num_frames, 1)
 
-    for i in range(0, total_frames, step):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, i)
-        ret, frame = cap.read()
-        if not ret:
-            break
-        
-        # Resize frame early to save memory and speed up subsequent steps
-        h, w = frame.shape[:2]
-        if max(h, w) > max_dim:
-            scale = max_dim / max(h, w)
-            frame = cv2.resize(frame, (int(w * scale), int(h * scale)))
+        for i in range(0, total_frames, step):
+            cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+            ret, frame = cap.read()
+            if not ret:
+                break
             
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        pil_img = Image.fromarray(frame)
-        
-        if apply_transform:
-            frames.append(transform(pil_img))
-        else:
-            frames.append(pil_img)
+            # Resize frame early to save memory and speed up subsequent steps
+            h, w = frame.shape[:2]
+            if max(h, w) > max_dim:
+                scale = max_dim / max(h, w)
+                frame = cv2.resize(frame, (int(w * scale), int(h * scale)))
+                
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            pil_img = Image.fromarray(frame)
             
-        if len(frames) >= num_frames:
-            break
-    cap.release()
+            if apply_transform:
+                frames.append(transform(pil_img))
+            else:
+                frames.append(pil_img)
+                
+            if len(frames) >= num_frames:
+                break
+    finally:
+        cap.release()
+        try:
+            os.remove(tmp_path)
+        except:
+            pass
 
     if not frames:
         raise ValueError("No frames extracted from video")

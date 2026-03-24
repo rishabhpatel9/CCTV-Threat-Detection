@@ -104,31 +104,32 @@ This project utilizes several datasets for model training and evaluation:\
 
 ```bash
 CCTV-Threat-Detection/
-├── app/
+├── backend/                                # FastAPI backend
+│   ├── models/                             # Pre-trained models (.pth / .pt)
+│   ├── api.py                              # FastAPI backend logic
+│   ├── Dockerfile                          # Backend Docker image
+│   └── requirements.txt                    # Backend dependencies
+├── frontend/                               # Streamlit frontend apps
 │   ├── streamlit-app.py                    # UI to upload images/videos
-│   └── streamlit-webcam.py                 # Live stream analysis UI
+│   ├── streamlit-webcam.py                 # Live stream analysis UI
+│   ├── Dockerfile                          # Frontend Docker image
+│   └── requirements.txt                    # Frontend dependencies
 ├── Data/                                   # Dataset directory
 ├── Example GIFs/                           # Example GIFs for Readme.md
-├── Notebooks/                              # Jupyter Notebooks and Models
+├── Notebooks/                              # Jupyter Notebooks for training/dev
 │   ├── Rule-Based-Threat-Detection.ipynb
 │   ├── anamoly-detection-model.ipynb
 │   ├── violence-detection-i3d.ipynb
 │   ├── violence-detection-slowfast.ipynb
 │   ├── weapon-detection-model-mark2.ipynb
-│   ├── weapon-detection-model-simuletic.ipynb
-│   └── *.pth / *.pt                        # Pre-trained models (LFS)
+│   └── weapon-detection-model-simuletic.ipynb
 ├── .gitattributes
 ├── .gitignore
-├── api.py                                  # FastAPI backend
 ├── docker-compose.yml
-├── Dockerfile.backend
-├── Dockerfile.frontend
 ├── example.env
 ├── LICENSE
 ├── Readme.md
-├── requirements-backend.txt
-├── requirements-frontend.txt
-└── requirements.txt
+└── requirements.txt                        # Unified requirements for local dev/deployment
 ```
 
 ---
@@ -162,13 +163,15 @@ cp example.env .env
 Run FastAPI backend:
 
 ```bash
+cd backend
 uvicorn api:app --reload
 ```
 
 Run Streamlit Webcam based frontend:
 
 ```bash
-streamlit run app/streamlit-webcam.py
+cd frontend
+streamlit run streamlit-webcam.py
 ```
 
 *OR*
@@ -176,7 +179,8 @@ streamlit run app/streamlit-webcam.py
 Run Streamlit upload image/video frontend:
 
 ```bash
-streamlit run app/streamlit-app.py
+cd frontend
+streamlit run streamlit-app.py
 ```
 
 ### Deployment with Docker

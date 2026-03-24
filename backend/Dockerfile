@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     git \
     git-lfs \
     && rm -rf /var/lib/apt/lists/*
-COPY requirements-backend.txt .
+COPY requirements.txt .
 
 ARG USE_GPU=false
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -16,10 +16,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu ; \
     fi
 
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-backend.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 COPY . .
 
-RUN git lfs install && git lfs pull
 # Port for FastAPI
 EXPOSE 8000
 
