@@ -11,6 +11,10 @@ import cv2
 from ultralytics import YOLO
 import tempfile
 import os
+from download_models import download_models
+
+# Ensure models are present before startup
+download_models()
 
 app = FastAPI()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
