@@ -18,3 +18,4 @@ pydantic
 python-multipart
 uvicorn
 PyYAML
+huggingface_hub
