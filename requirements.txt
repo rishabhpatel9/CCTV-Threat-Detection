@@ -28,3 +28,4 @@ streamlit-webrtc
 requests
 twilio
 PyYAML
+huggingface_hub
