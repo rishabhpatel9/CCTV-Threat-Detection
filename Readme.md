@@ -229,6 +229,8 @@ docker-compose down
 
 ## Future Work
 
+*Refer to [Project Expansion Roadmap](Project_Expansion_Roadmap.md) for detailed future work.*
+
 - **Indoor & Home Security Focus**: Optimize the deployment experience for indoor and home environments. This includes building comprehensive management dashboards and real time alert systems (SMS/Push notifications) to provide a professional, user friendly security experience.
 - **Violence/Fighting Detection Pipeline**: Implement YOLOv8 as a preprocessing step to detect and crop person instances from frames before feeding them into action recognition models. This will improve accuracy by focusing purely on human interactions and reducing background interference.
 - **Loitering & Advanced Anomaly Detection**: Integrate object tracking (e.g., DeepSORT) with YOLOv8 to analyze person trajectories, enabling the detection of loitering and other movement-based anomalies.
