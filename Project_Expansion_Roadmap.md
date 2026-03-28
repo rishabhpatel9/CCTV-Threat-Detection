@@ -14,10 +14,10 @@ Efficient containerization is critical for both the deployment speed and the sto
     - Current status - Separated backend and frontend code and optimized dockerfiles.
 3. [X] **External Model Weight Management**
     - Initial goal - Transition from baking weights into the image to using volume mounts or a runtime download script, decoupling large binaries from the portable code image.
-    - Current status - Models have been uploaded to huggingface hub and will be auto downloaded when the api is run.
-4. [ ] **Multi-Stage Build Architecture**
-    - Initial goal - Implement multi-stage Docker builds to ensure that build-time dependencies are discarded in the final production runtime image.
-    - Current status -
+    - Current status - Models are hosted on Hugging Face and specifically excluded from Docker images via `.dockerignore`, ensuring they are only downloaded at runtime.
+4. [X] **Multi-Stage Build Architecture**
+    - Initial goal - Implement multi stage Docker builds to ensure that build time dependencies are discarded in the final production runtime image.
+    - Current status - Both frontend and backend Dockerfiles refactored to use multi stage builds, separating build time tools (gcc, etc.) from the lean runtime environment.
 
 ## Phase 2: Streamlined Onboarding and Installation
 
