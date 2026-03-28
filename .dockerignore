@@ -17,6 +17,7 @@ env/
 Data/
 Example GIFs/
 Notebooks/
+backend/models/
 
 # Build artifacts and tools
 docker-compose.yml
