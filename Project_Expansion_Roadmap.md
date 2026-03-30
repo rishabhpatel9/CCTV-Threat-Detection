@@ -19,7 +19,24 @@ Efficient containerization is critical for both the deployment speed and the sto
     - Initial goal - Implement multi stage Docker builds to ensure that build time dependencies are discarded in the final production runtime image.
     - Current status - Both frontend and backend Dockerfiles refactored to use multi stage builds, separating build time tools (gcc, etc.) from the lean runtime environment.
 
-## Phase 2: Streamlined Onboarding and Installation
+## Phase 2: YOLOv26 Experimentation and Threat Logic
+
+This phase involves exploring cutting-edge models and refining the core detection logic to improve accuracy and reduce false positives.
+
+1. [ ] **YOLOv26 Test Branch Setup**
+    - Initial goal - Create a new experimental branch to integrate and test the YOLOv26 architecture. Focus on assessing its compatibility with the existing inference pipeline.
+    - Current status - 
+2. [ ] **Enhanced Threat Detection Logic**
+    - Initial goal - Implement new heuristics and logic for threat identification, leveraging the higher precision of the YOLOv26 model to distinguish between mundane objects and actual security threats.
+    - Current status - 
+3. [ ] **Inference Optimization for YOLOv26**
+    - Initial goal - Optimize the model's inference performance to ensure that the switch doesn't introduce significant latency, especially on resource constrained environments.
+    - Current status - 
+4. [ ] **Comparative Analysis and Validation**
+    - Initial goal - Conduct thorough comparative testing between the current model and YOLOv26 using a standardized dataset of security footage to validate the improvement in detection metrics.
+    - Current status - 
+
+## Phase 3: Streamlined Onboarding and Installation
 
 To achieve an "it just works" experience, the barrier to entry must be lowered. The current manual steps involve multiple dependencies and large file downloads that are prone to failure.
 
@@ -36,7 +53,7 @@ To achieve an "it just works" experience, the barrier to entry must be lowered. 
     - Initial goal - Add a utility to scan the local network for IP cameras supporting the ONVIF protocol. This allows users to import multiple camera feeds simply by clicking "Add Found Camera" rather than manually typing long RTSP URLs.
     - Current status -
 
-## Phase 3: Core ML Intelligence and Privacy
+## Phase 4: Core ML Intelligence and Privacy
 
 Current models detect general threats but lack the nuance needed for a private home or office.
 
@@ -53,7 +70,7 @@ Current models detect general threats but lack the nuance needed for a private h
     - Initial goal - Allow users to define virtual lines across a doorway or driveway. Instead of alerting on any movement, the system only triggers if an object crosses the line in a specific direction (such as someone entering the house).
     - Current status -
 
-## Phase 4: Unified Management and Event History
+## Phase 5: Unified Management and Event History
 
 The current interface is built for real time demos. A security system needs historical context.
 
@@ -70,7 +87,7 @@ The current interface is built for real time demos. A security system needs hist
     - Initial goal - Manage local storage by implementing a cleanup policy. For example, keep high confidence threat clips for 30 days and safe clips for only 24 hours, automatically deleting the oldest data when the disk reaches 90 percent capacity.
     - Current status -
 
-## Phase 5: Notifications and Connectivity
+## Phase 6: Notifications and Connectivity
 
 Security is only useful if the user can be notified immediately when away from the console.
 
@@ -87,7 +104,7 @@ Security is only useful if the user can be notified immediately when away from t
     - Initial goal - Expose an MQTT broker interface or outbound webhooks. This allows the system to trigger external actions, such as turning on the porch lights if a weapon is detected or locking smart doors if a significant anomaly is flagged.
     - Current status -
 
-## Phase 6: Hardware Acceleration and Portability
+## Phase 7: Hardware Acceleration and Portability
 
 To run continuously, the system must be efficient and portable.
 
@@ -101,7 +118,7 @@ To run continuously, the system must be efficient and portable.
     - Initial goal - Use the microphone feed (if available) to detect specialized sounds like glass breaking, shouting, or gunshots. Combining audio with visual data provides a much more robust fusion layer for high stakes security.
     - Current status -
 
-## Phase 7: Specialized Safety Features
+## Phase 8: Specialized Safety Features
 
 Beyond crime detection, the system can provide value for safety and wellness.
 
@@ -118,9 +135,10 @@ Beyond crime detection, the system can provide value for safety and wellness.
 ## Implementation Sequence Summary
 
 1. **Optimization**: Implement Docker ignore patterns, selective copying, and multi-stage builds (Phase 1).
-2. **Foundation**: Build the Model Manager, Multi-Stream Support, and Configuration Wizard (Phase 2).
-3. **Dashboard**: Establish the Database and Unified NVR UI (Phase 4).
-4. **Intelligence**: Add Tracking, Geofencing, and Whitelisting (Phase 3).
-5. **Alerts**: Implement Push Notifications and Mobile PWA (Phase 5).
-6. **Efficiency**: Port to Edge Devices and add Sliding Window logic (Phase 6).
-7. **Safety**: Deploy Fall Detection and Audio Anomalies (Phase 7).
+2. **Experimentation**: Branch out for YOLOv26 testing and refined threat detection logic (Phase 2).
+3. **Foundation**: Build the Model Manager, Multi-Stream Support, and Configuration Wizard (Phase 3).
+4. **Dashboard**: Establish the Database and Unified NVR UI (Phase 5).
+5. **Intelligence**: Add Tracking, Geofencing, and Whitelisting (Phase 4).
+6. **Alerts**: Implement Push Notifications and Mobile PWA (Phase 6).
+7. **Efficiency**: Port to Edge Devices and add Sliding Window logic (Phase 7).
+8. **Safety**: Deploy Fall Detection and Audio Anomalies (Phase 8).
