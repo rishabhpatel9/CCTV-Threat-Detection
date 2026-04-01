@@ -21,3 +21,6 @@ backend/models/*.pth
 backend/models/*.pt
 *.pth
 *.pt
+
+# Phase 2 Docs
+phase2.md
