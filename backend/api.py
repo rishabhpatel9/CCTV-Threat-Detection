@@ -19,8 +19,11 @@ download_models()
 app = FastAPI()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Robust path handling
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Load Weapons detection model (YOLOv8 trained on weapon detection cctv v3 dataset.v1-weapon_detection_in_cctv.yolov8 from roboflow)
-weapon_model = YOLO("models/weapon-detection-model-mark2.pt")
+weapon_model = YOLO(os.path.join(BASE_DIR, "models/weapon-detection-model-mark2.pt"))
 
 # OR
 
@@ -30,7 +33,7 @@ weapon_model = YOLO("models/weapon-detection-model-mark2.pt")
 # Load Violence detection model (SlowFast)
 violence_model = torch.hub.load('facebookresearch/pytorchvideo', 'slowfast_r50', pretrained=False)
 violence_model.blocks[-1].proj = nn.Linear(violence_model.blocks[-1].proj.in_features, 3)
-violence_model.load_state_dict(torch.load(r"models/violence-detection-slowfast-model.pth", map_location=device, weights_only=False))
+violence_model.load_state_dict(torch.load(os.path.join(BASE_DIR, "models/violence-detection-slowfast-model.pth"), map_location=device, weights_only=False))
 violence_model.eval().to(device)
 
 # Load I3D feature extractor for anomaly detection
@@ -61,7 +64,7 @@ class Autoencoder(nn.Module):
 
 # Load Anomaly detection model (Autoencoder)
 anomaly_model = Autoencoder().to(device)
-anomaly_model.load_state_dict(torch.load("models/anamoly-detection-model-epoch10.pth", map_location=device, weights_only=False))
+anomaly_model.load_state_dict(torch.load(os.path.join(BASE_DIR, "models/anamoly-detection-model-epoch10.pth"), map_location=device, weights_only=False))
 anomaly_model.eval()
 
 # Preprocessing
