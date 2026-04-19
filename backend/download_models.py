@@ -19,8 +19,25 @@ def download_models():
     print("Checking for required models...")
     for model_file in models:
         model_path = os.path.join(models_dir, model_file)
-        if not os.path.exists(model_path):
-            print(f"Downloading {model_file} from Hugging Face Hub...")
+        
+        # Check if file exists and is not a Git LFS pointer (very small files are likely pointers)
+        is_valid = False
+        if os.path.exists(model_path):
+            if os.path.getsize(model_path) > 1024:  # If > 1KB, likely not a pointer
+                is_valid = True
+            else:
+                # Check content for LFS signature
+                try:
+                    with open(model_path, 'r') as f:
+                        content = f.read(100)
+                        if "version https://git-lfs.github.com/spec/v1" not in content:
+                            is_valid = True
+                except:
+                    # If we can't read it as text, it might be a real binary model
+                    is_valid = True
+        
+        if not is_valid:
+            print(f"Downloading {model_file} from Hugging Face Hub (existing file is missing or a placeholder)...")
             try:
                 hf_hub_download(
                     repo_id=repo_id,
@@ -33,7 +50,7 @@ def download_models():
                 print(f"Error downloading {model_file}: {e}")
                 print(f"Please ensure {model_file} is available at huggingface.co/{repo_id}")
         else:
-            print(f"Model {model_file} already exists.")
+            print(f"Model {model_file} already exists and appears valid.")
 
 if __name__ == "__main__":
     download_models()
